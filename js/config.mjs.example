@@ -1,0 +1,4 @@
+export default {
+  host: 'cho.cyan.com',
+  port: 1812
+};
