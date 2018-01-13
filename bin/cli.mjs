@@ -4,6 +4,7 @@ import { Socket } from '../js/lib/socket.mjs';
 import { CCClient } from '../js/client/cc_client.mjs';
 import { CCUser } from '../js/client/cc_user.mjs';
 import { CCBroadcastEvent } from '../js/client/cc_events.mjs';
+import URL_REGEX from '../js/lib/url_regex.mjs';
 import readline from 'readline';
 
 if (!process.stdout.isTTY) {
@@ -61,7 +62,11 @@ input.on('line', (line) => {
 
 
 cc.addEventListener('broadcast', (evt) => {
-  const {user, msgType, message} = evt.detail;
+  let {user, msgType, message} = evt.detail;
+
+  if (message.match(URL_REGEX)) {
+    message = message.replace(URL_REGEX, `\x1b]8;;$&\x07$&\x1b]8;;\x07`);
+  }
 
   switch (msgType) {
     case 2:
@@ -101,8 +106,6 @@ function set_up_screen() {
 function add_line(line) {
   const length = textlen(line);
   const lines = Math.ceil(length / ws[0]);
-
-  process.stderr.write(`Line: ${line}\n\tLength: ${length}\n\tLines: ${lines}\n`);
 
   process.stdout.write(`\x1b7`);              // Save cursor position
   process.stdout.write(`\x1b[3;1H`);          // Set cursor to line 3

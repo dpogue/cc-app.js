@@ -79,7 +79,7 @@ try {
       delete evt.currentTarget;
       delete evt.target;
 
-      return true;
+      return !evt.defaultPrevented;
     }
   };
 }
