@@ -23,6 +23,6 @@ const PATH_AND_QUERY = `[/\\?](?:(?:[${LABEL_CHAR};/\\?:@&=#~\\.\\+!\\*'\\(\\),_
 
 const WEB_URL_WITH_PROTOCOL = `(${WORD_BOUNDARY}(?:(?:${PROTOCOL}(?:${USER_INFO})?)(?:${DOMAIN})?(?:${PORT_NUMBER})?)(${PATH_AND_QUERY})?${WORD_BOUNDARY})`;
 
-const WEB_URL = new RegExp(WEB_URL_WITH_PROTOCOL, 'ium');
+const WEB_URL = new RegExp(WEB_URL_WITH_PROTOCOL, 'gui');
 
 export default WEB_URL;
