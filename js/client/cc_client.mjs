@@ -75,7 +75,7 @@ msgHandlers['40'] = function(client, data) {
 
     const newnick = cdata.get('new_nickname');
     if (newnick) {
-      client.send(`10|${newnick}`);
+      client.sendRaw(`10|${newnick}`);
     }
   }
 
@@ -112,6 +112,14 @@ export class CCClient extends EventTarget {
     return clientData.get(this).get('version');
   }
 
+  get host() {
+    return this.socket && (new URL(this.socket.url)).hostname;
+  }
+
+  get port() {
+    return this.socket && (new URL(this.socket.url)).port;
+  }
+
   get nickname() {
     return clientData.get(this).get('nickname');
   }
@@ -120,7 +128,7 @@ export class CCClient extends EventTarget {
     clientData.get(this).set('new_nickname', newnick);
 
     if (this.connected) {
-      this.send(`10|${newnick}`);
+      this.sendRaw(`10|${newnick}`);
     }
   }
 
@@ -144,10 +152,22 @@ export class CCClient extends EventTarget {
     }
 
     clientData.get(this).set('version', version);
-    this.send(`40|${this.version}`);
+    this.sendRaw(`40|${this.version}`);
   }
 
-  send(msg) {
+
+  disconnect(close = false) {
+    if (this.nickname) {
+      this.sendRaw(`15`);
+    }
+
+    if (close) {
+      this.socket.close();
+    }
+  }
+
+
+  sendRaw(msg) {
     if (!this.socket) {
       throw new Error('CCClient socket is not set');
     }
@@ -159,6 +179,20 @@ export class CCClient extends EventTarget {
       sock.postMessage(packet);
     } else {
       sock.send(packet);
+    }
+  }
+
+
+  sendBroadcast(msg) {
+    this.sendRaw(`30|^1${msg}`);
+  }
+
+
+  sendAction(msg) {
+    if (this.version >= 2) {
+      this.sendRaw(`30|^4${msg}`);
+    } else {
+      this.sendRaw(`30|^1*${msg}*`);
     }
   }
 }

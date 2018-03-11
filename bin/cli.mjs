@@ -128,7 +128,7 @@ process.stdin.on('keypress', (str, key) => {
 set_up_screen();
 
 const cc = new CCClient();
-const sock = new Socket(`${host}:${port}`);
+const sock = new Socket(`tcp://${host}:${port}`);
 
 cc.socket = sock;
 cc.connect();
@@ -285,11 +285,7 @@ function ucs2decode(string) {
 
 
 function cleanup(err) {
-  if (cc.nickname) {
-    cc.send('15');
-  }
-
-  sock.close();
+  cc.disconnect(true);
 
   process.stdout.write(`\x1b[H`);             // Go to absolute origin
   process.stdout.write(`\x1b[2J`);            // Erase page down
@@ -320,14 +316,16 @@ function process_input(line) {
   if (m) {
     cc.nickname = m[1];
   } else if (line.match(/^\/part/)) {
-    if (cc.nickname) {
-      cc.send('15');
-    }
+    cc.disconnect();
   } else if (line.match(/^\/quit/) || line.match(/^\/exit/)) {
     input.close();
   } else {
     if (cc.nickname) {
-      cc.send(`30|^1${line.trim()}`);
+      if (line.match(/^\/me .*/)) {
+        cc.sendAction(line.replace(/^\/me /, '').trim());
+      } else {
+        cc.sendBroadcast(line.trim());
+      }
     } else {
       cc.dispatchEvent(new CCBroadcastEvent(new CCUser('3ChatServer,local'), 1, 'You must join the chat before sending messages'));
     }

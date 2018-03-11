@@ -1,12 +1,15 @@
 // Wrapper for NodeJS TCP Sockets in a WebSocket-y interface
 import { Event, EventTarget } from './event_target.mjs';
 import net from 'net';
+import { URL } from 'url';
 
 export class Socket extends EventTarget {
   constructor(url) {
     super();
 
-    const [host, port] = url.split(':');
+    this.url = url;
+
+    const { hostname, port } = new URL(url);
 
     this.socket = new net.Socket();
     this.socket.on('data', (data) => {
@@ -20,7 +23,7 @@ export class Socket extends EventTarget {
       this.dispatchEvent(evt);
     });
 
-    this.socket.connect(port|0, host);
+    this.socket.connect(port|0, hostname);
   }
 
   send(data) {
